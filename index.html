@@ -50,76 +50,117 @@
     <div class="container">
         <h1 id="page-title">正連線至 <span class="text-red">１ v １ - C</span> 伺 服 器</h1>
         <div class="loader" id="loader"></div>
-        <p id="status-text"></p>
+        <p id="status-text">正在確認伺服器狀態，請稍候...</p>
         <div class="button-group" id="button-group"></div>
     </div>
 
     <script>
-        (function () {
-            var TARGET_SERVER = "c";
-            var SERVER_IP = "114.34.29.54";
-            var COUNTDOWN_SECONDS = 2;
+        (async function () {
+            const TARGET_SERVER = "c";
+            const SERVER_IP = "114.34.29.54";
+            const STATUS_BASE_URL = "https://c2t.ddns.net:81";
+            const COUNTDOWN_SECONDS = 2;
+            const FETCH_TIMEOUT_MS = 2000;
+            const CACHE_TTL_MS = 30000;
+            const CACHE_KEY = "twcs_pk_status_v1";
 
-            var SERVERS = {
-                a: { key: "a", titleLabel: "１ v １ - A", descLabel: "１ v １ - A 服 (27018)", btnLabel: "1 v 1-A (27018)", port: 27018, weekendOnly: false },
-                b: { key: "b", titleLabel: "１ v １ - B", descLabel: "１ v １ - B 服 (27019)", btnLabel: "1 v 1-B (27019)", port: 27019, weekendOnly: false },
+            const SERVERS = {
+                a: { key: "a", titleLabel: "１ v １ - A", descLabel: "１ v １ - A 服 (27018)", btnLabel: "1 v 1-A (27018)", closedBtnLabel: "1 v 1-A (未 開)", port: 27018, weekendOnly: false },
+                b: { key: "b", titleLabel: "１ v １ - B", descLabel: "１ v １ - B 服 (27019)", btnLabel: "1 v 1-B (27019)", closedBtnLabel: "1 v 1-B (未 開)", port: 27019, weekendOnly: false },
                 c: { key: "c", titleLabel: "１ v １ - C", descLabel: "１ v １ - C 服 (27125)", btnLabel: "1 v 1-C (27125)", closedBtnLabel: "1 v 1-C (未 開)", port: 27125, weekendOnly: true }
             };
 
-            var BUTTON_ORDER = {
+            const BUTTON_ORDER = {
                 a: ["a", "b", "c"],
                 b: ["b", "a", "c"],
                 c: ["c", "a", "b"]
             };
 
-            function getSteamUrl(port) {
-                return "steam://run/730//+connect " + SERVER_IP + ":" + port;
-            }
+            const getSteamUrl = (port) => `steam://run/730//+connect ${SERVER_IP}:${port}`;
 
-            // 台灣時間 (UTC+8) 週五 22:00 ～ 週日 21:59
             function isWeekendServerOpen() {
-                var now = new Date();
-                var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                var twTime = new Date(utc + (3600000 * 8));
-                var day = twTime.getDay();
-                var hour = twTime.getHours();
+                const now = new Date();
+                const twTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 3600000 * 8);
+                const day = twTime.getDay();
+                const hour = twTime.getHours();
                 return (day === 5 && hour >= 22) || (day === 6) || (day === 0 && hour < 22);
             }
 
-            var target = SERVERS[TARGET_SERVER] || SERVERS.a;
-            var isCOpen = isWeekendServerOpen();
+            async function checkOneServer(srv) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+                try {
+                    const res = await fetch(`${STATUS_BASE_URL}/status_${srv.port}.json`, { signal: controller.signal });
+                    if (res.status === 404) return false;
+                    if (!res.ok) return srv.weekendOnly ? isWeekendServerOpen() : true;
+                    const data = await res.json();
+                    const p = String(data && data.players ? data.players : "").trim().toUpperCase();
+                    return p !== "" && p !== "OFFLINE" && p !== "ERROR";
+                } catch {
+                    return srv.weekendOnly ? isWeekendServerOpen() : true;
+                } finally {
+                    clearTimeout(timer);
+                }
+            }
 
-            var titleEl = document.getElementById("page-title");
-            var loaderEl = document.getElementById("loader");
-            var statusEl = document.getElementById("status-text");
-            var btnGroupEl = document.getElementById("button-group");
+            async function loadAllStatus() {
+                try {
+                    const raw = sessionStorage.getItem(CACHE_KEY);
+                    if (raw) {
+                        const cached = JSON.parse(raw);
+                        if (cached && (Date.now() - cached.ts) < CACHE_TTL_MS && cached.status) {
+                            return cached.status;
+                        }
+                    }
+                } catch {}
 
-            var countdownTimer = null;
-            function stopCountdown() {
+                const [a, b, c] = await Promise.all([
+                    checkOneServer(SERVERS.a),
+                    checkOneServer(SERVERS.b),
+                    checkOneServer(SERVERS.c)
+                ]);
+                const status = { a, b, c };
+
+                try {
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), status }));
+                } catch {}
+                return status;
+            }
+
+            const target = SERVERS[TARGET_SERVER] || SERVERS.a;
+            const titleEl = document.getElementById("page-title");
+            const loaderEl = document.getElementById("loader");
+            const statusEl = document.getElementById("status-text");
+            const btnGroupEl = document.getElementById("button-group");
+
+            const onlineMap = await loadAllStatus();
+
+            let countdownTimer = null;
+            const stopCountdown = () => {
                 if (countdownTimer !== null) {
                     clearInterval(countdownTimer);
                     countdownTimer = null;
                 }
-            }
+            };
 
-            var order = BUTTON_ORDER[target.key] || ["a", "b", "c"];
-            var styleClasses = ["manual-link secondary", "manual-link", "manual-link third"];
+            const order = BUTTON_ORDER[target.key] || ["a", "b", "c"];
+            const styleClasses = ["manual-link secondary", "manual-link", "manual-link third"];
 
-            order.forEach(function (key, index) {
-                var srv = SERVERS[key];
-                var link = document.createElement("a");
+            order.forEach((key, index) => {
+                const srv = SERVERS[key];
+                const link = document.createElement("a");
                 link.className = styleClasses[index] || "manual-link";
 
-                if (srv.weekendOnly && !isCOpen) {
+                if (!onlineMap[key]) {
                     link.classList.add("disabled");
                     link.textContent = srv.closedBtnLabel;
                 } else {
                     link.href = getSteamUrl(srv.port);
                     link.textContent = srv.btnLabel;
-                    link.addEventListener("click", function () {
+                    link.addEventListener("click", () => {
                         stopCountdown();
-                        titleEl.innerHTML = '正連線至 <span class="text-red">' + srv.titleLabel + '</span> 伺 服 器';
-                        statusEl.innerHTML = '已送出連線指令至 <span class="cs2-red">' + srv.descLabel + '</span><br><br>若遊戲未自動開啟，請再點一次下方按鈕';
+                        titleEl.innerHTML = `正連線至 <span class="text-red">${srv.titleLabel}</span> 伺 服 器`;
+                        statusEl.innerHTML = `已送出連線指令至 <span class="cs2-red">${srv.descLabel}</span><br><br>若遊戲未自動開啟，請再點一次下方按鈕`;
                         loaderEl.classList.remove("stopped");
                     });
                 }
@@ -127,31 +168,33 @@
                 btnGroupEl.appendChild(link);
             });
 
-            if (target.weekendOnly && !isCOpen) {
-                titleEl.innerHTML = '<span class="text-red">' + target.titleLabel + '</span> 目 前 未 開 放';
+            if (!onlineMap[target.key]) {
+                titleEl.innerHTML = `<span class="text-red">${target.titleLabel}</span> 目 前 未 開 放`;
                 loaderEl.classList.add("stopped");
-                statusEl.innerHTML = '開放時間：每週五 <span class="text-red">22:00</span> ～ 每週日 <span class="text-red">22:00</span><br><br>請點選下方按鈕改連其他伺服器';
+                statusEl.innerHTML = target.weekendOnly
+                    ? '目前伺服器尚未開啟（常規開放：每週五 <span class="text-red">22:00</span> ～ 每週日 <span class="text-red">22:00</span>）<br><br>請點選下方按鈕改連其他伺服器'
+                    : '目前伺服器尚未開啟或維護中<br><br>請點選下方按鈕改連其他伺服器';
                 return;
             }
 
-            var remaining = COUNTDOWN_SECONDS;
-            function renderCountdown() {
+            let remaining = COUNTDOWN_SECONDS;
+            const renderCountdown = () => {
                 statusEl.innerHTML =
-                    '正在準備連線到伺服器，請稍候<br><br>' +
-                    '系統將於 <span class="text-red">' + remaining + '</span> 秒後自動連線 ' +
-                    '<span class="cs2-red">' + target.descLabel + '</span>';
-            }
+                    `正在準備連線到伺服器，請稍候<br><br>` +
+                    `系統將於 <span class="text-red">${remaining}</span> 秒後自動連線 ` +
+                    `<span class="cs2-red">${target.descLabel}</span>`;
+            };
 
             renderCountdown();
-            countdownTimer = setInterval(function () {
+            countdownTimer = setInterval(() => {
                 remaining -= 1;
                 if (remaining > 0) {
                     renderCountdown();
                 } else {
                     stopCountdown();
                     statusEl.innerHTML =
-                        '已送出連線指令至 <span class="cs2-red">' + target.descLabel + '</span><br><br>' +
-                        '若遊戲未自動開啟，請點擊下方按鈕手動連線';
+                        `已送出連線指令至 <span class="cs2-red">${target.descLabel}</span><br><br>` +
+                        `若遊戲未自動開啟，請點擊下方按鈕手動連線`;
                     window.location.href = getSteamUrl(target.port);
                 }
             }, 1000);
