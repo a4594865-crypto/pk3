@@ -11,8 +11,8 @@
         .container { position: relative; background: rgba(0, 0, 0, .9); padding: 40px 24px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0, 0, 0, .8); text-align: center; width: 100%; max-width: 650px; box-sizing: border-box; border: 1px solid rgba(255, 255, 255, .1); }
         h1 { font-family: 'Oswald', 'Noto Sans TC', sans-serif; font-size: 2.2em; margin: 0 0 20px 0; color: #4da6ff; letter-spacing: 2px; text-transform: uppercase; }
         p { font-size: 1.15em; color: #aaa; margin: 0 0 30px 0; line-height: 1.6; }
-        .button-group { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 20px; width: 100%; }
-        .manual-link { width: 160px; box-sizing: border-box; padding: 12px 0; font-size: 16px; background-color: #4da6ff; color: #fff; text-decoration: none; border-radius: 4px; font-weight: 700; transition: all .3s ease; white-space: nowrap; text-align: center; }
+        .button-group { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 20px auto 0 auto; width: 100%; max-width: 260px; }
+        .manual-link { display: block; width: 100%; box-sizing: border-box; padding: 13px 0; font-size: 16px; background-color: #4da6ff; color: #fff; text-decoration: none; border-radius: 4px; font-weight: 700; transition: all .3s ease; white-space: nowrap; text-align: center; }
         .manual-link:hover { background-color: #a63a23; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(166, 58, 35, .3); }
         .manual-link:active { background-color: #7a2a19; }
         .manual-link.secondary { background-color: #FF5733; }
@@ -21,27 +21,33 @@
         .manual-link.third { background-color: #28a745; }
         .manual-link.third:hover { background-color: #1e7e34; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(40, 167, 69, .3); }
         .manual-link.third:active { background-color: #155724; }
+        .manual-link.fourth { background-color: #8b5cf6; }
+        .manual-link.fourth:hover { background-color: #6d28d9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139, 92, 246, .3); }
+        .manual-link.fourth:active { background-color: #5b21b6; }
         .manual-link.disabled { background-color: #555 !important; color: #999 !important; cursor: not-allowed !important; pointer-events: none; box-shadow: none !important; transform: none !important; }
         .loader { width: 240px; height: 4px; background: rgba(255, 255, 255, .1); border-radius: 2px; margin: 0 auto 30px auto; position: relative; overflow: hidden; }
         .loader::after { content: ''; position: absolute; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, #4da6ff, transparent); animation: slide-progress 2s ease-in-out infinite; }
         .loader.stopped::after { animation: none; left: 0; background: rgba(255, 87, 51, .45); }
         @keyframes slide-progress { from { left: -100%; } to { left: 100%; } }
         .cs2-red, .text-red { color: #FF5733; font-weight: 900; }
+        @media (min-width: 520px) {
+            .button-group { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 440px; gap: 18px; }
+        }
         @media (min-width: 760px) {
-            .container { max-width: 855px; padding: 64px 36px; border-radius: 11px; }
+            .container { max-width: 855px; padding: 64px 44px; border-radius: 11px; }
             h1 { font-size: 3.1em; margin-bottom: 27px; }
             p { font-size: 1.55em; margin-bottom: 40px; }
-            .button-group { gap: 24px; margin-top: 27px; }
-            .manual-link { width: 195px; padding: 16px 0; font-size: 20px; border-radius: 5px; }
+            .button-group { max-width: 560px; gap: 24px; margin-top: 27px; }
+            .manual-link { padding: 17px 0; font-size: 20px; border-radius: 6px; }
             .loader { width: 320px; height: 5px; margin: 0 auto 40px auto; }
         }
         @media (min-width: 1000px) {
             .container { max-width: 1000px; padding: 80px 60px; border-radius: 16px; }
             h1 { font-size: 3.5em; margin-bottom: 40px; }
-            p { font-size: 2.1em; margin-bottom: 56px; }
-            .button-group { gap: 32px; margin-top: 40px; }
-            .manual-link { width: 250px; padding: 24px 0; font-size: 24px; border-radius: 8px; }
-            .loader { width: 480px; height: 8px; margin: 0 auto 56px auto; }
+            p { font-size: 2.1em; margin-bottom: 52px; }
+            .button-group { max-width: 680px; gap: 28px; margin-top: 36px; }
+            .manual-link { padding: 22px 0; font-size: 24px; border-radius: 8px; }
+            .loader { width: 480px; height: 8px; margin: 0 auto 52px auto; }
         }
     </style>
 </head>
@@ -60,44 +66,43 @@
             const SERVER_IP = "114.34.29.54";
             const STATUS_BASE_URL = "https://c2t.ddns.net:81";
             const COUNTDOWN_SECONDS = 2;
-            const FETCH_TIMEOUT_MS = 2000;
-            const CACHE_TTL_MS = 30000;
-            const CACHE_KEY = "twcs_pk_status_v1";
+            const FETCH_TIMEOUT_MS = 2500;
+            const CACHE_TTL_MS = 15000;
+            const CACHE_KEY = "twcs_pk_status_v2";
 
             const SERVERS = {
-                a: { key: "a", titleLabel: "１ v １ - A", descLabel: "１ v １ - A 服 (27018)", btnLabel: "1 v 1-A (27018)", closedBtnLabel: "1 v 1-A (未 開)", port: 27018, weekendOnly: false },
-                b: { key: "b", titleLabel: "１ v １ - B", descLabel: "１ v １ - B 服 (27019)", btnLabel: "1 v 1-B (27019)", closedBtnLabel: "1 v 1-B (未 開)", port: 27019, weekendOnly: false },
-                c: { key: "c", titleLabel: "１ v １ - C", descLabel: "１ v １ - C 服 (27125)", btnLabel: "1 v 1-C (27125)", closedBtnLabel: "1 v 1-C (未 開)", port: 27125, weekendOnly: true }
+                a: { key: "a", titleLabel: "１ v １ - A", descLabel: "１ v １ - A 服 (27018)", btnLabel: "1 v 1-A (27018)", closedBtnLabel: "1 v 1-A (未 開)", port: 27018 },
+                b: { key: "b", titleLabel: "１ v １ - B", descLabel: "１ v １ - B 服 (27019)", btnLabel: "1 v 1-B (27019)", closedBtnLabel: "1 v 1-B (未 開)", port: 27019 },
+                c: { key: "c", titleLabel: "１ v １ - C", descLabel: "１ v １ - C 服 (27125)", btnLabel: "1 v 1-C (27125)", closedBtnLabel: "1 v 1-C (未 開)", port: 27125 },
+                d: { key: "d", titleLabel: "１ v １ - D", descLabel: "１ v １ - D 服 (27225)", btnLabel: "1 v 1-D (27225)", closedBtnLabel: "1 v 1-D (未 開)", port: 27225 }
             };
 
             const BUTTON_ORDER = {
-                a: ["a", "b", "c"],
-                b: ["b", "a", "c"],
-                c: ["c", "a", "b"]
+                a: ["a", "b", "c", "d"],
+                b: ["b", "a", "c", "d"],
+                c: ["c", "a", "b", "d"],
+                d: ["d", "a", "b", "c"]
             };
 
             const getSteamUrl = (port) => `steam://run/730//+connect ${SERVER_IP}:${port}`;
 
-            function isWeekendServerOpen() {
-                const now = new Date();
-                const twTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 3600000 * 8);
-                const day = twTime.getDay();
-                const hour = twTime.getHours();
-                return (day === 5 && hour >= 22) || (day === 6) || (day === 0 && hour < 22);
-            }
-
             async function checkOneServer(srv) {
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+                const url = `${STATUS_BASE_URL}/status_${srv.port}.json`;
                 try {
-                    const res = await fetch(`${STATUS_BASE_URL}/status_${srv.port}.json`, { signal: controller.signal });
+                    const res = await fetch(url, { signal: controller.signal });
                     if (res.status === 404) return false;
-                    if (!res.ok) return srv.weekendOnly ? isWeekendServerOpen() : true;
+                    if (!res.ok) {
+                        console.warn(`[狀態偵測] ${url} HTTP ${res.status}`);
+                        return true;
+                    }
                     const data = await res.json();
-                    const p = String(data && data.players ? data.players : "").trim().toUpperCase();
+                    const p = String(data?.players ?? "").trim().toUpperCase();
                     return p !== "" && p !== "OFFLINE" && p !== "ERROR";
-                } catch {
-                    return srv.weekendOnly ? isWeekendServerOpen() : true;
+                } catch (err) {
+                    console.warn(`[狀態偵測失敗] ${url}:`, err);
+                    return true;
                 } finally {
                     clearTimeout(timer);
                 }
@@ -114,12 +119,13 @@
                     }
                 } catch {}
 
-                const [a, b, c] = await Promise.all([
+                const [a, b, c, d] = await Promise.all([
                     checkOneServer(SERVERS.a),
                     checkOneServer(SERVERS.b),
-                    checkOneServer(SERVERS.c)
+                    checkOneServer(SERVERS.c),
+                    checkOneServer(SERVERS.d)
                 ]);
-                const status = { a, b, c };
+                const status = { a, b, c, d };
 
                 try {
                     sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), status }));
@@ -143,8 +149,8 @@
                 }
             };
 
-            const order = BUTTON_ORDER[target.key] || ["a", "b", "c"];
-            const styleClasses = ["manual-link secondary", "manual-link", "manual-link third"];
+            const order = BUTTON_ORDER[target.key] || ["a", "b", "c", "d"];
+            const styleClasses = ["manual-link secondary", "manual-link", "manual-link third", "manual-link fourth"];
 
             order.forEach((key, index) => {
                 const srv = SERVERS[key];
@@ -169,11 +175,12 @@
             });
 
             if (!onlineMap[target.key]) {
+                const anyOnline = Object.values(onlineMap).some(Boolean);
                 titleEl.innerHTML = `<span class="text-red">${target.titleLabel}</span> 目 前 未 開 放`;
                 loaderEl.classList.add("stopped");
-                statusEl.innerHTML = target.weekendOnly
-                    ? '目前伺服器尚未開啟（常規開放：每週五 <span class="text-red">22:00</span> ～ 每週日 <span class="text-red">22:00</span>）<br><br>請點選下方按鈕改連其他伺服器'
-                    : '目前伺服器尚未開啟或維護中<br><br>請點選下方按鈕改連其他伺服器';
+                statusEl.innerHTML = anyOnline
+                    ? '目前伺服器尚未開啟或維護中<br><br>請點選下方按鈕改連其他伺服器'
+                    : '目前所有 1 v 1 伺服器皆尚未開啟或維護中<br><br>請稍後再試';
                 return;
             }
 
