@@ -1,108 +1,161 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <title>連線至 【TW】ＣＳ 同 學 會 １ v １ - C</title>
-    
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="2; url=steam://run/730//+connect 114.34.29.54:27125">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>連線至 【TW】ＣＳ 同 學 會 １ v １ - C</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Oswald:wght@500;700;900&display=swap" rel="stylesheet">
-<style>
-body{font-family:'Noto Sans TC',Arial,sans-serif;margin:0;padding:0;background:#020406;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden}
-.background{position:absolute;top:0;left:0;width:100%;height:100%;background-image:url('https://lh3.googleusercontent.com/d/1ScywmwrQA7nWDgIwVWpivfxVYd2MoJiy');background-size:cover;background-position:center;filter:brightness(.5) blur(4px);z-index:-1}
-.container{position:relative;background:rgba(0,0,0,.9);padding:50px 40px;border-radius:8px;box-shadow:0 20px 50px rgba(0,0,0,.8);text-align:center;width:100%;max-width:650px;box-sizing:border-box;border:1px solid rgba(255,255,255,.1)}
-h1{font-family:'Oswald',sans-serif;font-size:2.5em;margin-bottom:20px;color:#4da6ff;letter-spacing:2px;text-transform:uppercase}
-p{font-size:1.2em;color:#aaa;margin-bottom:30px;line-height:1.6}
-.button-group{display:flex;justify-content:center;gap:28px;margin-top:20px;width:100%}
-.manual-link{width:150px;box-sizing:border-box;padding:12px 0;font-size:16px;background-color:#4da6ff;color:#fff;text-decoration:none;border-radius:4px;font-weight:700;transition:all .3s ease;white-space:nowrap;text-align:center}
-.manual-link:hover{background-color:#a63a23;transform:translateY(-2px);box-shadow:0 5px 15px rgba(166,58,35,.3)}
-.manual-link:active{background-color:#7a2a19}
-.manual-link.secondary{background-color:#FF5733}
-.manual-link.secondary:hover{background-color:#1a7bb9;transform:translateY(-2px);box-shadow:0 5px 15px rgba(26,123,185,.3)}
-.manual-link.secondary:active{background-color:#104f77}
-.manual-link.third{background-color:#28a745}
-.manual-link.third:hover{background-color:#1e7e34;transform:translateY(-2px);box-shadow:0 5px 15px rgba(40,167,69,.3)}
-.manual-link.third:active{background-color:#155724}
-.manual-link.disabled{background-color:#555 !important;color:#999 !important;cursor:not-allowed !important;pointer-events:none;box-shadow:none !important;transform:none !important}
-.loader{width:240px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:0 auto 30px auto;position:relative;overflow:hidden}
-.loader::after{content:'';position:absolute;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,#4da6ff,transparent);animation:slide-progress 3s steps(20) infinite}
-@keyframes slide-progress{from{left:-100%}to{left:100%}}
-.cs2-red{color:#FF5733;font-weight:900}
-.text-red{color:#FF5733;font-weight:900}
-@media (min-width: 760px) {
-    .container { max-width: 855px; padding: 67px 53px; border-radius: 11px; }
-    h1 { font-size: 3.33em; margin-bottom: 27px; }
-    p { font-size: 1.6em; margin-bottom: 40px; }
-    .button-group { gap: 37px; margin-top: 27px; }
-    .manual-link { width: 200px; padding: 16px 0; font-size: 21px; border-radius: 5px; }
-    .loader { width: 320px; height: 5px; margin: 0 auto 40px auto; }
-}
-@media (min-width: 1000px) {
-    .container { max-width: 1000px; padding: 80px 60px; border-radius: 16px; }
-    h1 { font-size: 3.5em; margin-bottom: 40px; }
-    p { font-size: 2.2em; margin-bottom: 60px; }
-    .button-group { gap: 56px; margin-top: 40px; }
-    .manual-link { width: 300px; padding: 24px 0; font-size: 28px; border-radius: 8px; }
-    .loader { width: 480px; height: 8px; margin: 0 auto 60px auto; }
-}
-</style>
+    <style>
+        body { font-family: 'Noto Sans TC', Arial, sans-serif; margin: 0; padding: 16px; background: #020406; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
+        .background { position: fixed; inset: 0; background-image: url('https://lh3.googleusercontent.com/d/1ScywmwrQA7nWDgIwVWpivfxVYd2MoJiy'); background-size: cover; background-position: center; filter: brightness(.5) blur(4px); z-index: -1; }
+        .container { position: relative; background: rgba(0, 0, 0, .9); padding: 40px 24px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0, 0, 0, .8); text-align: center; width: 100%; max-width: 650px; box-sizing: border-box; border: 1px solid rgba(255, 255, 255, .1); }
+        h1 { font-family: 'Oswald', 'Noto Sans TC', sans-serif; font-size: 2.2em; margin: 0 0 20px 0; color: #4da6ff; letter-spacing: 2px; text-transform: uppercase; }
+        p { font-size: 1.15em; color: #aaa; margin: 0 0 30px 0; line-height: 1.6; }
+        .button-group { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 20px; width: 100%; }
+        .manual-link { width: 160px; box-sizing: border-box; padding: 12px 0; font-size: 16px; background-color: #4da6ff; color: #fff; text-decoration: none; border-radius: 4px; font-weight: 700; transition: all .3s ease; white-space: nowrap; text-align: center; }
+        .manual-link:hover { background-color: #a63a23; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(166, 58, 35, .3); }
+        .manual-link:active { background-color: #7a2a19; }
+        .manual-link.secondary { background-color: #FF5733; }
+        .manual-link.secondary:hover { background-color: #1a7bb9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(26, 123, 185, .3); }
+        .manual-link.secondary:active { background-color: #104f77; }
+        .manual-link.third { background-color: #28a745; }
+        .manual-link.third:hover { background-color: #1e7e34; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(40, 167, 69, .3); }
+        .manual-link.third:active { background-color: #155724; }
+        .manual-link.disabled { background-color: #555 !important; color: #999 !important; cursor: not-allowed !important; pointer-events: none; box-shadow: none !important; transform: none !important; }
+        .loader { width: 240px; height: 4px; background: rgba(255, 255, 255, .1); border-radius: 2px; margin: 0 auto 30px auto; position: relative; overflow: hidden; }
+        .loader::after { content: ''; position: absolute; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, #4da6ff, transparent); animation: slide-progress 2s ease-in-out infinite; }
+        .loader.stopped::after { animation: none; left: 0; background: rgba(255, 87, 51, .45); }
+        @keyframes slide-progress { from { left: -100%; } to { left: 100%; } }
+        .cs2-red, .text-red { color: #FF5733; font-weight: 900; }
+        @media (min-width: 760px) {
+            .container { max-width: 855px; padding: 64px 36px; border-radius: 11px; }
+            h1 { font-size: 3.1em; margin-bottom: 27px; }
+            p { font-size: 1.55em; margin-bottom: 40px; }
+            .button-group { gap: 24px; margin-top: 27px; }
+            .manual-link { width: 195px; padding: 16px 0; font-size: 20px; border-radius: 5px; }
+            .loader { width: 320px; height: 5px; margin: 0 auto 40px auto; }
+        }
+        @media (min-width: 1000px) {
+            .container { max-width: 1000px; padding: 80px 60px; border-radius: 16px; }
+            h1 { font-size: 3.5em; margin-bottom: 40px; }
+            p { font-size: 2.1em; margin-bottom: 56px; }
+            .button-group { gap: 32px; margin-top: 40px; }
+            .manual-link { width: 250px; padding: 24px 0; font-size: 24px; border-radius: 8px; }
+            .loader { width: 480px; height: 8px; margin: 0 auto 56px auto; }
+        }
+    </style>
 </head>
 <body>
+    <div class="background"></div>
+    <div class="container">
+        <h1 id="page-title">正連線至 <span class="text-red">１ v １ - C</span> 伺 服 器</h1>
+        <div class="loader" id="loader"></div>
+        <p id="status-text"></p>
+        <div class="button-group" id="button-group"></div>
+    </div>
 
-<div class="background"></div>
+    <script>
+        (function () {
+            var TARGET_SERVER = "c";
+            var SERVER_IP = "114.34.29.54";
+            var COUNTDOWN_SECONDS = 2;
 
-<div class="container">
-    <h1>正連線至 <span class="text-red">１ v １- C </span> 伺 服 器</h1>
-    <div class="loader"></div>
-    <p>
-        正在準備連線到伺服器，請稍候
-        <br><br>
-        系統將於 <span class="text-red">３</span> 秒後自動連線 <span class="cs2-red">１ v １ - C 服 (27125)</span>
-    </p>
-    
-   <div class="button-group">
-       <a href="#" class="manual-link third" id="btn-c">
-        1 v 1-C (27125)
-    
-    </a>
-    
-    <a href="steam://run/730//+connect 114.34.29.54:27018" class="manual-link">
-        1 v 1-A (27018)
-    </a>
+            var SERVERS = {
+                a: { key: "a", titleLabel: "１ v １ - A", descLabel: "１ v １ - A 服 (27018)", btnLabel: "1 v 1-A (27018)", port: 27018, weekendOnly: false },
+                b: { key: "b", titleLabel: "１ v １ - B", descLabel: "１ v １ - B 服 (27019)", btnLabel: "1 v 1-B (27019)", port: 27019, weekendOnly: false },
+                c: { key: "c", titleLabel: "１ v １ - C", descLabel: "１ v １ - C 服 (27125)", btnLabel: "1 v 1-C (27125)", closedBtnLabel: "1 v 1-C (未 開)", port: 27125, weekendOnly: true }
+            };
 
-    <a href="steam://run/730//+connect 114.34.29.54:27019" class="manual-link secondary">
-        1 v 1-B (27019)
-    </a>
-</div>
-</div>
+            var BUTTON_ORDER = {
+                a: ["a", "b", "c"],
+                b: ["b", "a", "c"],
+                c: ["c", "a", "b"]
+            };
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var btnC = document.getElementById("btn-c");
-        if (!btnC) return;
+            function getSteamUrl(port) {
+                return "steam://run/730//+connect " + SERVER_IP + ":" + port;
+            }
 
-        // 1.標準的台灣時間 (UTC+8)
-        var now = new Date();
-        var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        var twTime = new Date(utc + (3600000 * 8));
-        
-        var day = twTime.getDay();
-        var hour = twTime.getHours();
+            // 台灣時間 (UTC+8) 週五 22:00 ～ 週日 21:59
+            function isWeekendServerOpen() {
+                var now = new Date();
+                var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                var twTime = new Date(utc + (3600000 * 8));
+                var day = twTime.getDay();
+                var hour = twTime.getHours();
+                return (day === 5 && hour >= 22) || (day === 6) || (day === 0 && hour < 22);
+            }
 
-        // 2. 判斷是否在開放時段星期五 22:00 起 ～ 星期日 21:59 (不到 22:00)
-        var isOpenTime = (day === 5 && hour >= 22) || (day === 6) || (day === 0 && hour < 22);
+            var target = SERVERS[TARGET_SERVER] || SERVERS.a;
+            var isCOpen = isWeekendServerOpen();
 
-        // 3. 根據時間切換按鈕狀態
-        if (isOpenTime) {
-            btnC.classList.remove("disabled");
-            btnC.innerHTML = "1 v 1-C (27125)";
-            btnC.setAttribute("href", "steam://run/730//+connect 114.34.29.54:27125");
-        } else {
-            btnC.classList.add("disabled");
-            btnC.innerHTML = "1 v 1-C (未 開)";
-            btnC.removeAttribute("href");
-        }
-    });
-</script>
+            var titleEl = document.getElementById("page-title");
+            var loaderEl = document.getElementById("loader");
+            var statusEl = document.getElementById("status-text");
+            var btnGroupEl = document.getElementById("button-group");
 
+            var countdownTimer = null;
+            function stopCountdown() {
+                if (countdownTimer !== null) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+            }
+
+            var order = BUTTON_ORDER[target.key] || ["a", "b", "c"];
+            var styleClasses = ["manual-link secondary", "manual-link", "manual-link third"];
+
+            order.forEach(function (key, index) {
+                var srv = SERVERS[key];
+                var link = document.createElement("a");
+                link.className = styleClasses[index] || "manual-link";
+
+                if (srv.weekendOnly && !isCOpen) {
+                    link.classList.add("disabled");
+                    link.textContent = srv.closedBtnLabel;
+                } else {
+                    link.href = getSteamUrl(srv.port);
+                    link.textContent = srv.btnLabel;
+                    link.addEventListener("click", function () {
+                        stopCountdown();
+                        titleEl.innerHTML = '正連線至 <span class="text-red">' + srv.titleLabel + '</span> 伺 服 器';
+                        statusEl.innerHTML = '已送出連線指令至 <span class="cs2-red">' + srv.descLabel + '</span><br><br>若遊戲未自動開啟，請再點一次下方按鈕';
+                        loaderEl.classList.remove("stopped");
+                    });
+                }
+
+                btnGroupEl.appendChild(link);
+            });
+
+            if (target.weekendOnly && !isCOpen) {
+                titleEl.innerHTML = '<span class="text-red">' + target.titleLabel + '</span> 目 前 未 開 放';
+                loaderEl.classList.add("stopped");
+                statusEl.innerHTML = '開放時間：每週五 <span class="text-red">22:00</span> ～ 每週日 <span class="text-red">22:00</span><br><br>請點選下方按鈕改連其他伺服器';
+                return;
+            }
+
+            var remaining = COUNTDOWN_SECONDS;
+            function renderCountdown() {
+                statusEl.innerHTML =
+                    '正在準備連線到伺服器，請稍候<br><br>' +
+                    '系統將於 <span class="text-red">' + remaining + '</span> 秒後自動連線 ' +
+                    '<span class="cs2-red">' + target.descLabel + '</span>';
+            }
+
+            renderCountdown();
+            countdownTimer = setInterval(function () {
+                remaining -= 1;
+                if (remaining > 0) {
+                    renderCountdown();
+                } else {
+                    stopCountdown();
+                    statusEl.innerHTML =
+                        '已送出連線指令至 <span class="cs2-red">' + target.descLabel + '</span><br><br>' +
+                        '若遊戲未自動開啟，請點擊下方按鈕手動連線';
+                    window.location.href = getSteamUrl(target.port);
+                }
+            }, 1000);
+        })();
+    </script>
 </body>
 </html>
