@@ -68,13 +68,13 @@
             const COUNTDOWN_SECONDS = 2;
             const FETCH_TIMEOUT_MS = 2500;
             const CACHE_TTL_MS = 15000;
-            const CACHE_KEY = "twcs_pk_status_v2";
+            const CACHE_KEY = "twcs_pk_cd_status_v1";
 
             const SERVERS = {
-                a: { key: "a", titleLabel: "１ v １ - A", descLabel: "１ v １ - A 服 (27018)", btnLabel: "1 v 1-A (27018)", closedBtnLabel: "1 v 1-A (未 開)", port: 27018 },
-                b: { key: "b", titleLabel: "１ v １ - B", descLabel: "１ v １ - B 服 (27019)", btnLabel: "1 v 1-B (27019)", closedBtnLabel: "1 v 1-B (未 開)", port: 27019 },
-                c: { key: "c", titleLabel: "１ v １ - C", descLabel: "１ v １ - C 服 (27125)", btnLabel: "1 v 1-C (27125)", closedBtnLabel: "1 v 1-C (未 開)", port: 27125 },
-                d: { key: "d", titleLabel: "１ v １ - D", descLabel: "１ v １ - D 服 (27225)", btnLabel: "1 v 1-D (27225)", closedBtnLabel: "1 v 1-D (未 開)", port: 27225 }
+                a: { key: "a", titleLabel: "１ v １ - A", descLabel: "１ v １ - A 服 (27018)", btnLabel: "1 v 1-A (27018)", port: 27018, alwaysOnline: true },
+                b: { key: "b", titleLabel: "１ v １ - B", descLabel: "１ v １ - B 服 (27019)", btnLabel: "1 v 1-B (27019)", port: 27019, alwaysOnline: true },
+                c: { key: "c", titleLabel: "１ v １ - C", descLabel: "１ v １ - C 服 (27125)", btnLabel: "1 v 1-C (27125)", checkingBtnLabel: "1 v 1-C (偵 測 中)", closedBtnLabel: "1 v 1-C (未 開)", port: 27125, alwaysOnline: false },
+                d: { key: "d", titleLabel: "１ v １ - D", descLabel: "１ v １ - D 服 (27225)", btnLabel: "1 v 1-D (27225)", checkingBtnLabel: "1 v 1-D (偵 測 中)", closedBtnLabel: "1 v 1-D (未 開)", port: 27225, alwaysOnline: false }
             };
 
             const BUTTON_ORDER = {
@@ -108,7 +108,7 @@
                 }
             }
 
-            async function loadAllStatus() {
+            async function loadDynamicStatus() {
                 try {
                     const raw = sessionStorage.getItem(CACHE_KEY);
                     if (raw) {
@@ -119,13 +119,11 @@
                     }
                 } catch {}
 
-                const [a, b, c, d] = await Promise.all([
-                    checkOneServer(SERVERS.a),
-                    checkOneServer(SERVERS.b),
+                const [c, d] = await Promise.all([
                     checkOneServer(SERVERS.c),
                     checkOneServer(SERVERS.d)
                 ]);
-                const status = { a, b, c, d };
+                const status = { c, d };
 
                 try {
                     sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), status }));
@@ -139,9 +137,9 @@
             const statusEl = document.getElementById("status-text");
             const btnGroupEl = document.getElementById("button-group");
 
-            const onlineMap = await loadAllStatus();
-
             let countdownTimer = null;
+            let userClickedManual = false;
+
             const stopCountdown = () => {
                 if (countdownTimer !== null) {
                     clearInterval(countdownTimer);
@@ -149,62 +147,94 @@
                 }
             };
 
+            const startCountdown = () => {
+                let remaining = COUNTDOWN_SECONDS;
+                const renderCountdown = () => {
+                    statusEl.innerHTML =
+                        `正在準備連線到伺服器，請稍候<br><br>` +
+                        `系統將於 <span class="text-red">${remaining}</span> 秒後自動連線 ` +
+                        `<span class="cs2-red">${target.descLabel}</span>`;
+                };
+
+                renderCountdown();
+                countdownTimer = setInterval(() => {
+                    remaining -= 1;
+                    if (remaining > 0) {
+                        renderCountdown();
+                    } else {
+                        stopCountdown();
+                        statusEl.innerHTML =
+                            `已送出連線指令至 <span class="cs2-red">${target.descLabel}</span><br><br>` +
+                            `若遊戲未自動開啟，請點擊下方按鈕手動連線`;
+                        window.location.href = getSteamUrl(target.port);
+                    }
+                }, 1000);
+            };
+
             const order = BUTTON_ORDER[target.key] || ["a", "b", "c", "d"];
             const styleClasses = ["manual-link secondary", "manual-link", "manual-link third", "manual-link fourth"];
+            const btnRefs = {};
+
+            const applyButtonState = (key, isOnline) => {
+                const srv = SERVERS[key];
+                const link = btnRefs[key];
+                if (!link) return;
+
+                if (isOnline === null) {
+                    link.classList.add("disabled");
+                    link.removeAttribute("href");
+                    link.textContent = srv.checkingBtnLabel || srv.btnLabel;
+                } else if (isOnline === false) {
+                    link.classList.add("disabled");
+                    link.removeAttribute("href");
+                    link.textContent = srv.closedBtnLabel || srv.btnLabel;
+                } else {
+                    link.classList.remove("disabled");
+                    link.href = getSteamUrl(srv.port);
+                    link.textContent = srv.btnLabel;
+                }
+            };
 
             order.forEach((key, index) => {
                 const srv = SERVERS[key];
                 const link = document.createElement("a");
                 link.className = styleClasses[index] || "manual-link";
-
-                if (!onlineMap[key]) {
-                    link.classList.add("disabled");
-                    link.textContent = srv.closedBtnLabel;
-                } else {
-                    link.href = getSteamUrl(srv.port);
-                    link.textContent = srv.btnLabel;
-                    link.addEventListener("click", () => {
-                        stopCountdown();
-                        titleEl.innerHTML = `正連線至 <span class="text-red">${srv.titleLabel}</span> 伺 服 器`;
-                        statusEl.innerHTML = `已送出連線指令至 <span class="cs2-red">${srv.descLabel}</span><br><br>若遊戲未自動開啟，請再點一次下方按鈕`;
-                        loaderEl.classList.remove("stopped");
-                    });
-                }
-
+                link.addEventListener("click", () => {
+                    if (link.classList.contains("disabled")) return;
+                    userClickedManual = true;
+                    stopCountdown();
+                    titleEl.innerHTML = `正連線至 <span class="text-red">${srv.titleLabel}</span> 伺 服 器`;
+                    statusEl.innerHTML = `已送出連線指令至 <span class="cs2-red">${srv.descLabel}</span><br><br>若遊戲未自動開啟，請再點一次下方按鈕`;
+                    loaderEl.classList.remove("stopped");
+                });
                 btnGroupEl.appendChild(link);
+                btnRefs[key] = link;
+                applyButtonState(key, srv.alwaysOnline ? true : null);
             });
 
-            if (!onlineMap[target.key]) {
-                const anyOnline = Object.values(onlineMap).some(Boolean);
-                titleEl.innerHTML = `<span class="text-red">${target.titleLabel}</span> 目 前 未 開 放`;
-                loaderEl.classList.add("stopped");
-                statusEl.innerHTML = anyOnline
-                    ? '目前伺服器尚未開啟或維護中<br><br>請點選下方按鈕改連其他伺服器'
-                    : '目前所有 1 v 1 伺服器皆尚未開啟或維護中<br><br>請稍後再試';
+            if (target.alwaysOnline) {
+                startCountdown();
+                const cdStatus = await loadDynamicStatus();
+                applyButtonState("c", cdStatus.c);
+                applyButtonState("d", cdStatus.d);
                 return;
             }
 
-            let remaining = COUNTDOWN_SECONDS;
-            const renderCountdown = () => {
-                statusEl.innerHTML =
-                    `正在準備連線到伺服器，請稍候<br><br>` +
-                    `系統將於 <span class="text-red">${remaining}</span> 秒後自動連線 ` +
-                    `<span class="cs2-red">${target.descLabel}</span>`;
-            };
+            statusEl.textContent = "正在確認伺服器狀態，請稍候...";
+            const cdStatus = await loadDynamicStatus();
+            applyButtonState("c", cdStatus.c);
+            applyButtonState("d", cdStatus.d);
 
-            renderCountdown();
-            countdownTimer = setInterval(() => {
-                remaining -= 1;
-                if (remaining > 0) {
-                    renderCountdown();
-                } else {
-                    stopCountdown();
-                    statusEl.innerHTML =
-                        `已送出連線指令至 <span class="cs2-red">${target.descLabel}</span><br><br>` +
-                        `若遊戲未自動開啟，請點擊下方按鈕手動連線`;
-                    window.location.href = getSteamUrl(target.port);
-                }
-            }, 1000);
+            if (userClickedManual) return;
+
+            if (!cdStatus[target.key]) {
+                titleEl.innerHTML = `<span class="text-red">${target.titleLabel}</span> 目 前 未 開 放`;
+                loaderEl.classList.add("stopped");
+                statusEl.innerHTML = '目前伺服器尚未開啟或維護中<br><br>請點選下方按鈕改連其他伺服器';
+                return;
+            }
+
+            startCountdown();
         })();
     </script>
 </body>
